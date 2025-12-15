@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎄 Elf Productivity Tracker – Competition Edition</title>
+
+  <!-- GOOGLE FONT -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --red: #c62828;
+      --green: #1b5e20;
+      --gold: #ffd54f;
+      --glass: rgba(255,255,255,0.88);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      color: #222;
+      background:
+        linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)),
+        url("christmas-ai-background.jpg") center / cover no-repeat fixed;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "❄ ❅ ❄ ❅ ❄ ❅ ❄ ❅ ❄ ❅ ❄ ❅";
+      position: fixed;
+      top: -40px;
+      width: 200%;
+      font-size: 26px;
+      opacity: 0.35;
+      animation: snow 18s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes snow {
+      from { transform: translateX(0) translateY(0); }
+      to { transform: translateX(-50%) translateY(110vh); }
+    }
+
+    header {
+      text-align: center;
+      padding: 70px 20px;
+      background: linear-gradient(135deg, #b71c1c, #7f0000);
+      color: white;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+
+    header h1 {
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-shadow: 0 0 25px rgba(255,255,255,0.5);
+    }
+
+    header p {
+      margin-top: 12px;
+      font-size: 1.2rem;
+      opacity: 0.95;
+    }
+
+    main {
+      max-width: 1400px;
+      margin: auto;
+      padding: 50px 20px 70px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 40px;
+    }
+
+    .card {
+      background: var(--glass);
+      backdrop-filter: blur(14px);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+      position: relative;
+    }
+
+    h2 {
+      font-size: 2rem;
+      margin-bottom: 30px;
+      color: var(--red);
+      border-bottom: 4px solid var(--red);
+      display: inline-block;
+      padding-bottom: 8px;
+    }
+
+    #elf-list { display: flex; flex-direction: column; gap: 18px; }
+
+    .elf {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 20px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #f5f7fa, #cfd8dc);
+    }
+
+    .elf input {
+      width: 120px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid #bbb;
+    }
+
+    button {
+      background: linear-gradient(135deg, var(--green), #0d3d14);
+      color: white;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 14px;
+      text-align: center;
+    }
+
+    th { background: var(--red); color: white; }
+
+    footer {
+      text-align: center;
+      padding: 28px;
+      background: rgba(0,0,0,0.45);
+      color: var(--gold);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🎄 Elf Productivity Tracker</h1>
+  <p>Competition Edition – Who is Santa’s Top Elf?</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>🧝 Available Elves</h2>
+    <div id="elf-list"></div>
+  </section>
+
+  <section class="card">
+    <h2>🏆 Leaderboard</h2>
+    <table>
+      <thead>
+        <tr><th>Elf</th><th>Jobs</th><th>Total Time</th><th>Efficiency</th></tr>
+      </thead>
+      <tbody id="leaderboard-body"></tbody>
+    </table>
+  </section>
+
+  <!-- MINI GAME ADDED CLEANLY -->
+  <section class="card">
+    <h2>🎮 Mini Game: Catch the Gift</h2>
+    <p>Click the gift as many times as you can in 30 seconds!</p>
+    <div id="game" style="position:relative;height:260px;background:#eee;border-radius:16px;margin-top:12px;">
+      <span id="gift" style="position:absolute;font-size:42px;cursor:pointer;">🎁</span>
+    </div>
+    <p style="margin-top:12px;font-weight:600;">Score: <span id="score">0</span> | Time: <span id="time">30</span>s</p>
+    <button onclick="startGame()">Start Game</button>
+  </section>
+</main>
+
+<footer>🎅 Santa’s Workshop Management System</footer>
+
+<script>
+  const elves = [
+    { id: 1, name: "Buddy", jobs: 0, time: 0, busy: false },
+    { id: 2, name: "Jingle", jobs: 0, time: 0, busy: false },
+    { id: 3, name: "Spark", jobs: 0, time: 0, busy: false },
+    { id: 4, name: "Snowflake", jobs: 0, time: 0, busy: false }
+  ];
+
+  const elfList = document.getElementById("elf-list");
+  const leaderboardBody = document.getElementById("leaderboard-body");
+
+  function renderElves() {
+    elfList.innerHTML = "";
+    elves.forEach(elf => {
+      const div = document.createElement("div");
+      div.className = "elf";
+      div.innerHTML = `<strong>${elf.name}</strong><input type='number' id='time-${elf.id}' placeholder='Seconds'><button onclick='assignJob(${elf.id})'>Assign</button>`;
+      elfList.appendChild(div);
+    });
+  }
+
+  function assignJob(id) {
+    const elf = elves.find(e => e.id === id);
+    const seconds = Number(document.getElementById(`time-${id}`).value);
+    if (!seconds || seconds <= 0) return alert("Enter valid seconds");
+    elf.jobs++;
+    elf.time += seconds;
+    renderLeaderboard();
+  }
+
+  function renderLeaderboard() {
+    leaderboardBody.innerHTML = "";
+    [...elves].sort((a,b) => (b.jobs/(b.time||1))-(a.jobs/(a.time||1))).forEach(e => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${e.name}</td><td>${e.jobs}</td><td>${e.time}</td><td>${(e.jobs/(e.time||1)).toFixed(2)}</td>`;
+      leaderboardBody.appendChild(tr);
+    });
+  }
+
+  // ===== MINI GAME LOGIC (GLOBAL & SAFE) =====
+  let score = 0;
+  let timeLeft = 30;
+  let timer;
+  const gift = document.getElementById("gift");
+  const game = document.getElementById("game");
+  const scoreEl = document.getElementById("score");
+  const timeEl = document.getElementById("time");
+
+  function moveGift() {
+    gift.style.left = Math.random() * (game.clientWidth - 40) + "px";
+    gift.style.top = Math.random() * (game.clientHeight - 40) + "px";
+  }
+
+  gift.addEventListener("click", () => {
+    if (timeLeft <= 0) return;
+    score++;
+    scoreEl.textContent = score;
+    moveGift();
+  });
+
+  function startGame() {
+    score = 0;
+    timeLeft = 30;
+    scoreEl.textContent = score;
+    timeEl.textContent = timeLeft;
+    moveGift();
+    clearInterval(timer);
+    timer = setInterval(() => {
+      timeLeft--;
+      timeEl.textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        alert(`🎉 Time's up! Your score: ${score}`);
+      }
+    }, 1000);
+  }
+
+  renderElves();
+  renderLeaderboard();
+</script>
+</body>
+</html>
